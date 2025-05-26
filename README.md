@@ -12,4 +12,4 @@ Given the type of the recording, one can continue with Axon_Tracking or DeePhys 
 
 
 Command to create conda environment:
-{conda create -n my_matlab_env python=3.10 numpy spikeinterface h5py matplotlib tqdm pandas seaborn -c conda-forge}
+'conda create -n my_matlab_env python=3.10 numpy spikeinterface h5py matplotlib tqdm pandas seaborn -c conda-forge'
