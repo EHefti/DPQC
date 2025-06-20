@@ -15,7 +15,7 @@ Given the type of the recording, one can continue with Axon_Tracking or DeePhys 
 ## Set Up
 1. Create a conda environment with the following command:
 
-   `conda create -n your_env_name python=3.9 matplotlib pathlib h5py numpy pandas tqdm skops scikit-learn spikeinterface bombcell -c conda-forge`
+   `conda create -n your_env_name python=3.9 matplotlib pathlib h5py numpy pandas tqdm skops scikit-learn spikeinterface ipykernel -c conda-forge`
 
    _(change `your_env_name` to the name you want for your environement)_
 
