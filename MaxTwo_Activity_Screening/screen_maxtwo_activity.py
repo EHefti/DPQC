@@ -172,6 +172,7 @@ def screen_maxtwo_activity(
             axes[0].set_title('Estimated Firing Rate Distribution per Well (Hz/channel)')
             axes[0].set_xlabel('Well ID')
             axes[0].set_ylabel('Estimated Firing Rate (Hz/channel)')
+            axes[0].set_yscale('log')
             axes[0].tick_params(axis='x', rotation=45)
             axes[0].grid(axis='y', linestyle='--', alpha=0.7)
             # Add a horizontal line for the threshold for visual reference if desired
@@ -184,6 +185,7 @@ def screen_maxtwo_activity(
             axes[0].set_title('Estimated Firing Rate Distribution per Well')
             axes[0].set_xlabel('Well ID')
             axes[0].set_ylabel('Estimated Firing Rate (Hz/channel)')
+            axes[0].set_yscale('log')
 
         # Plot Amplitudes
         if amplitude_values_for_boxplot:
@@ -191,6 +193,7 @@ def screen_maxtwo_activity(
             axes[1].set_title('Absolute Amplitude Distribution per Well (uV)')
             axes[1].set_xlabel('Well ID')
             axes[1].set_ylabel('Absolute Amplitude (uV)')
+            axes[1].set_yscale('log')
             axes[1].tick_params(axis='x', rotation=45)
             axes[1].grid(axis='y', linestyle='--', alpha=0.7)
             axes[1].axhline(y=amp_lower_threshold, color='r', linestyle='--', alpha=0.6, label='Lower Threshold')
@@ -202,6 +205,7 @@ def screen_maxtwo_activity(
             axes[1].set_title('Absolute Amplitude Distribution per Well')
             axes[1].set_xlabel('Well ID')
             axes[1].set_ylabel('Absolute Amplitude (uV)')
+            axes[1].set_yscale('log')
 
         plt.tight_layout(rect=[0, 0.03, 1, 0.95])
         plt.show()
