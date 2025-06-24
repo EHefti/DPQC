@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+.vscode/
+
+# Database files / Generated data
+anaconda_projects/db/
