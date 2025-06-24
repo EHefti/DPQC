@@ -4,7 +4,7 @@ import pandas as pd
 from statistics import mean
 from sklearn.metrics import confusion_matrix, balanced_accuracy_score
 import spikeinterface.curation as sc
-import spikeinterface.full as si # Using spikeinterface.full for convenience
+import spikeinterface.full as si
 
 
 def plot_model_evaluation(analyzer, model_folder, manual_labels):

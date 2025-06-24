@@ -1,6 +1,6 @@
 from pathlib import Path
 import h5py
-import spikeinterface.full as si 
+import spikeinterface.full as si
 import pandas as pd
 from statistics import mean
 
