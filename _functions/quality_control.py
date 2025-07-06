@@ -14,7 +14,21 @@ import spikeinterface.extractors as si_extractors
 # import spikeinterface.core as si
 
 
-def compute_analyzer(rec_path, save_root, well_id, num_units_to_use='all', hp_cutoff_freq=300):
+def generate_cluster_info(path_to_sorting):
+    cluster_info_path = path_to_sorting / 'cluster_info.tsv'
+    if not cluster_info_path.exists():
+        spike_clusters = np.load(path_to_sorting / 'spike_clusters.npy')
+        unit_ids = np.unique(spike_clusters)
+    
+        # Create a DataFrame with just 'cluster_id'
+        cluster_info_df = pd.DataFrame({'cluster_id': unit_ids})
+    
+        # Save to TSV
+        cluster_info_df.to_csv(cluster_info_path, sep='\t', index=False)
+        print(f"Generated basic cluster_info.tsv at: {cluster_info_path}")
+
+
+def compute_analyzer(rec_path, save_root, well_id, num_units_to_use='all', hp_cutoff_freq=1):
     """
     Computes the analyzer for a given recording and sorting.
     
@@ -30,6 +44,7 @@ def compute_analyzer(rec_path, save_root, well_id, num_units_to_use='all', hp_cu
     
     # Load the sorting
     path_to_sorting = Path(save_root) / well_id / 'sorter_output'
+    generate_cluster_info(path_to_sorting)
     sorting_train = si.read_kilosort(folder_path=path_to_sorting)
 
     # Load the recording
@@ -285,7 +300,7 @@ def generate_sample_data(durations=[10], sampling_frequency=30000, num_channels=
 
 
 
-def auto_label_stream(rec_path, save_root, stream_id, model_folder):
+def auto_label_stream(rec_path, save_root, stream_id, model_folder, hp_cutoff = 1):
     """
     Function to label a stream using the trained model. 
     Labels are saved in the sorting output directory.
@@ -295,6 +310,7 @@ def auto_label_stream(rec_path, save_root, stream_id, model_folder):
     - save_root (str): Root directory where the sorting output is saved.
     - stream_id (str): Identifier for the stream to be labeled.
     - model_folder (str): Folder where the trained model is stored.
+    - hp_cutoff (float): Cutoff frequency for the recording dato to clean data
     
     Returns:
     - None
@@ -304,17 +320,35 @@ def auto_label_stream(rec_path, save_root, stream_id, model_folder):
     print("------------------------")
     print("")
     print(f'Analyzing and Labeling {stream_id}:')
+
+    """
     h5 = h5py.File(rec_path)
     rec_name = list(h5['wells'][stream_id].keys())[0]
     rec = si.MaxwellRecordingExtractor(rec_path, stream_id=stream_id, rec_name=rec_name)
 
+    
+    print(f"Applying high-pass filter with {hp_cutoff} Hz cut-off...")
+    rec = si.highpass_filter(rec, freq_min=hp_cutoff)
+    
+    
     path_to_sorting = Path(save_root) / stream_id / 'sorter_output'
+    generate_cluster_info(path_to_sorting)
     sorting = si.read_kilosort(folder_path=path_to_sorting)
     
 
     analyzer = si.create_sorting_analyzer(sorting=sorting, recording=rec)
     analyzer.compute(['noise_levels','random_spikes','waveforms','templates','spike_locations','spike_amplitudes',
                       'correlograms','principal_components', 'quality_metrics', 'template_metrics'])
+    
+    """
+    
+    recording, sorting, analyzer = compute_analyzer(
+        rec_path, save_root, 
+        well_id=stream_id, 
+        num_units_to_use='all', # use num_units_to_use='all' to use all units
+        hp_cutoff_freq=hp_cutoff) 
+    
+
     
     labels_and_probabilities = si.auto_label_units(
         sorting_analyzer=analyzer,
@@ -323,8 +357,8 @@ def auto_label_stream(rec_path, save_root, stream_id, model_folder):
     )
 
     # print how many units were labeled as good and bad
-    good_units = sum(label == 'good' for label in labels_and_probabilities["label"])
-    bad_units = sum(label == 'bad' for label in labels_and_probabilities["label"])
+    good_units = sum(label == 'good' for label in labels_and_probabilities["prediction"])
+    bad_units = sum(label == 'bad' for label in labels_and_probabilities["prediction"])
     print(f'Number of good units: {good_units}')
     print(f'Number of bad units: {bad_units}')
 
@@ -333,7 +367,8 @@ def auto_label_stream(rec_path, save_root, stream_id, model_folder):
     print("")
 
     labels_and_probabilities = pd.DataFrame(labels_and_probabilities)
-    labels_and_probabilities.to_csv(path_to_sorting / 'labels_and_probabilities.csv')
+    labels_path = Path(save_root) / stream_id / 'sorter_output' / 'labels_and_probabilities.csv'
+    labels_and_probabilities.to_csv(labels_path)
 
 
 
