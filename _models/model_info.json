@@ -29,26 +29,10 @@
                     "refractory_period_ms": 1.0,
                     "censored_period_ms": 0.0
                 },
-                "isi_violation": {
-                    "isi_threshold_ms": 1.5,
-                    "min_isi_ms": 0
-                },
-                "num_spikes": {},
-                "l_ratio": {},
-                "amplitude_median": {
-                    "peak_sign": "neg"
-                },
-                "d_prime": {},
-                "amplitude_cutoff": {
-                    "peak_sign": "neg",
-                    "num_histogram_bins": 100,
-                    "histogram_smoothing_value": 3,
-                    "amplitudes_bins_min_ratio": 5
-                },
                 "synchrony": {},
-                "presence_ratio": {
-                    "bin_duration_s": 60,
-                    "mean_fr_ratio_thresh": 0.0
+                "snr": {
+                    "peak_sign": "neg",
+                    "peak_mode": "extremum"
                 },
                 "firing_range": {
                     "bin_size_s": 5,
@@ -57,16 +41,17 @@
                         95
                     ]
                 },
-                "snr": {
-                    "peak_sign": "neg",
-                    "peak_mode": "extremum"
+                "isi_violation": {
+                    "isi_threshold_ms": 1.5,
+                    "min_isi_ms": 0
                 },
+                "firing_rate": {},
                 "silhouette": {
                     "method": [
                         "simplified"
                     ]
                 },
-                "isolation_distance": {},
+                "num_spikes": {},
                 "amplitude_cv": {
                     "average_num_spikes_per_bin": 50,
                     "percentiles": [
@@ -75,12 +60,6 @@
                     ],
                     "min_num_bins": 10,
                     "amplitude_extension": "spike_amplitudes"
-                },
-                "drift": {
-                    "interval_s": 60,
-                    "min_spikes_per_interval": 100,
-                    "direction": "y",
-                    "min_num_bins": 2
                 },
                 "nearest_neighbor": {
                     "max_spikes": 10000,
@@ -91,6 +70,28 @@
                     "correct_for_drift": true,
                     "correct_for_template_itself": true
                 },
+                "amplitude_median": {
+                    "peak_sign": "neg"
+                },
+                "amplitude_cutoff": {
+                    "peak_sign": "neg",
+                    "num_histogram_bins": 100,
+                    "histogram_smoothing_value": 3,
+                    "amplitudes_bins_min_ratio": 5
+                },
+                "d_prime": {},
+                "isolation_distance": {},
+                "l_ratio": {},
+                "presence_ratio": {
+                    "bin_duration_s": 60,
+                    "mean_fr_ratio_thresh": 0.0
+                },
+                "drift": {
+                    "interval_s": 60,
+                    "min_spikes_per_interval": 100,
+                    "direction": "y",
+                    "min_num_bins": 2
+                },
                 "sliding_rp_violation": {
                     "min_spikes": 0,
                     "bin_size_ms": 0.25,
@@ -98,8 +99,7 @@
                     "exclude_ref_period_below_ms": 0.5,
                     "max_ref_period_ms": 10,
                     "contamination_values": null
-                },
-                "firing_rate": {}
+                }
             },
             "skip_pc_metrics": false,
             "delete_existing_metrics": false,
@@ -139,59 +139,7 @@
             "peak_sign": "neg",
             "upsampling_factor": 10,
             "metric_params": {
-                "peak_trough_ratio": {
-                    "recovery_window_ms": 0.7,
-                    "peak_relative_threshold": 0.2,
-                    "peak_width_ms": 0.1,
-                    "depth_direction": "y",
-                    "min_channels_for_velocity": 5,
-                    "min_r2_velocity": 0.5,
-                    "exp_peak_function": "ptp",
-                    "min_r2_exp_decay": 0.5,
-                    "spread_threshold": 0.2,
-                    "spread_smooth_um": 20,
-                    "column_range": null
-                },
-                "half_width": {
-                    "recovery_window_ms": 0.7,
-                    "peak_relative_threshold": 0.2,
-                    "peak_width_ms": 0.1,
-                    "depth_direction": "y",
-                    "min_channels_for_velocity": 5,
-                    "min_r2_velocity": 0.5,
-                    "exp_peak_function": "ptp",
-                    "min_r2_exp_decay": 0.5,
-                    "spread_threshold": 0.2,
-                    "spread_smooth_um": 20,
-                    "column_range": null
-                },
                 "repolarization_slope": {
-                    "recovery_window_ms": 0.7,
-                    "peak_relative_threshold": 0.2,
-                    "peak_width_ms": 0.1,
-                    "depth_direction": "y",
-                    "min_channels_for_velocity": 5,
-                    "min_r2_velocity": 0.5,
-                    "exp_peak_function": "ptp",
-                    "min_r2_exp_decay": 0.5,
-                    "spread_threshold": 0.2,
-                    "spread_smooth_um": 20,
-                    "column_range": null
-                },
-                "peak_to_valley": {
-                    "recovery_window_ms": 0.7,
-                    "peak_relative_threshold": 0.2,
-                    "peak_width_ms": 0.1,
-                    "depth_direction": "y",
-                    "min_channels_for_velocity": 5,
-                    "min_r2_velocity": 0.5,
-                    "exp_peak_function": "ptp",
-                    "min_r2_exp_decay": 0.5,
-                    "spread_threshold": 0.2,
-                    "spread_smooth_um": 20,
-                    "column_range": null
-                },
-                "num_positive_peaks": {
                     "recovery_window_ms": 0.7,
                     "peak_relative_threshold": 0.2,
                     "peak_width_ms": 0.1,
@@ -217,7 +165,59 @@
                     "spread_smooth_um": 20,
                     "column_range": null
                 },
+                "half_width": {
+                    "recovery_window_ms": 0.7,
+                    "peak_relative_threshold": 0.2,
+                    "peak_width_ms": 0.1,
+                    "depth_direction": "y",
+                    "min_channels_for_velocity": 5,
+                    "min_r2_velocity": 0.5,
+                    "exp_peak_function": "ptp",
+                    "min_r2_exp_decay": 0.5,
+                    "spread_threshold": 0.2,
+                    "spread_smooth_um": 20,
+                    "column_range": null
+                },
+                "peak_to_valley": {
+                    "recovery_window_ms": 0.7,
+                    "peak_relative_threshold": 0.2,
+                    "peak_width_ms": 0.1,
+                    "depth_direction": "y",
+                    "min_channels_for_velocity": 5,
+                    "min_r2_velocity": 0.5,
+                    "exp_peak_function": "ptp",
+                    "min_r2_exp_decay": 0.5,
+                    "spread_threshold": 0.2,
+                    "spread_smooth_um": 20,
+                    "column_range": null
+                },
+                "peak_trough_ratio": {
+                    "recovery_window_ms": 0.7,
+                    "peak_relative_threshold": 0.2,
+                    "peak_width_ms": 0.1,
+                    "depth_direction": "y",
+                    "min_channels_for_velocity": 5,
+                    "min_r2_velocity": 0.5,
+                    "exp_peak_function": "ptp",
+                    "min_r2_exp_decay": 0.5,
+                    "spread_threshold": 0.2,
+                    "spread_smooth_um": 20,
+                    "column_range": null
+                },
                 "num_negative_peaks": {
+                    "recovery_window_ms": 0.7,
+                    "peak_relative_threshold": 0.2,
+                    "peak_width_ms": 0.1,
+                    "depth_direction": "y",
+                    "min_channels_for_velocity": 5,
+                    "min_r2_velocity": 0.5,
+                    "exp_peak_function": "ptp",
+                    "min_r2_exp_decay": 0.5,
+                    "spread_threshold": 0.2,
+                    "spread_smooth_um": 20,
+                    "column_range": null
+                },
+                "num_positive_peaks": {
                     "recovery_window_ms": 0.7,
                     "peak_relative_threshold": 0.2,
                     "peak_width_ms": 0.1,

@@ -66,12 +66,28 @@ def compute_analyzer(rec_path, save_root, well_id, num_units_to_use='all', hp_cu
         sorting_train = sorting_train.select_units(unit_ids=selected_unit_ids)
     
         print(f"Restricted sorting to {len(sorting_train.get_unit_ids())} units for development.")
-
+    
+    
     # Create and compute analyzer with the scaled recording and restricted sorting
     analyzer = si.create_sorting_analyzer(sorting=sorting_train, recording=rec_train)
-    analyzer.compute(['noise_levels', 'random_spikes', 'waveforms', 'templates'])
-    analyzer.compute(['spike_locations', 'spike_amplitudes', 'correlograms', 
-                      'principal_components', 'quality_metrics', 'template_metrics'])
+
+    all_extensions_to_compute = [
+        'noise_levels', 'random_spikes', 'waveforms', 'templates',
+        'spike_locations', 'spike_amplitudes', 'correlograms',
+        'principal_components', 'quality_metrics', 'template_metrics'
+    ]
+    
+    extension_specific_params = {
+        'correlograms': {
+            'bin_ms': 1.0,   # Use 'bin_ms' (milliseconds)
+            'window_ms': 150.0 # Use 'window_ms' (milliseconds)
+        }
+    }
+    
+    analyzer.compute(
+        all_extensions_to_compute,
+        extension_params=extension_specific_params
+    )
     
     return rec_train, sorting_train, analyzer
 
@@ -144,9 +160,13 @@ def interactive_unit_labeler(recording, sorting, analyzer, output_dir_for_labels
             clear_output(wait=True)
             fig, axes = plt.subplots(1, 2, figsize=(14, 4))
 
+            # Plot Waveforms
+            spike_train = sorting.get_unit_spike_train(selected_unit_id)
+            num_spikes = spike_train.size
             sw.plot_unit_templates(analyzer, unit_ids=[selected_unit_id], ax=axes[0], same_axis=True, scale=1)
-            axes[0].set_title(f"Waveforms for Unit {selected_unit_id} (Label: {current_unit_labels[selected_unit_id]})")
+            axes[0].set_title(f"Waveforms for Unit {selected_unit_id} (# Spikes: {num_spikes}, Label: {current_unit_labels[selected_unit_id]})")
 
+            # Plot Autocorrelogram
             sw.plot_autocorrelograms(analyzer, unit_ids=[selected_unit_id], ax=axes[1])
             axes[1].set_title(f"Autocorrelogram for Unit {selected_unit_id}")
             
@@ -367,8 +387,33 @@ def auto_label_stream(rec_path, save_root, stream_id, model_folder, hp_cutoff = 
     print("")
 
     labels_and_probabilities = pd.DataFrame(labels_and_probabilities)
-    labels_path = Path(save_root) / stream_id / 'sorter_output' / 'labels_and_probabilities.csv'
-    labels_and_probabilities.to_csv(labels_path)
+    labels_path = Path(save_root) / stream_id / 'sorter_output' / 'labels_and_probabilities.tsv'
+    labels_and_probabilities.to_csv(labels_path, sep='\t', index=False)
+
+
+
+def plot_conf_matrix(manual_labels, predictions, label_classes, title='Predicted vs Manual Label', xlabel='Predicted Label', ylabel='Manual Label'):
+    conf_matrix = confusion_matrix(manual_labels, predictions, labels=label_classes)
+    balanced_accuracy = balanced_accuracy_score(manual_labels, predictions)
+    plt.figure(figsize=(8, 7))
+    plt.imshow(conf_matrix, interpolation='nearest', cmap=plt.cm.Blues)
+    plt.title(title, fontsize=16, pad=20)
+    plt.suptitle(f"Balanced Accuracy: {balanced_accuracy:.3f}", fontsize=18, weight='bold', y=0.98)
+    plt.colorbar(label='Count', shrink=0.7)
+    thresh = conf_matrix.max() / 2.
+    for i in range(conf_matrix.shape[0]):
+        for j in range(conf_matrix.shape[1]):
+            plt.text(j, i, format(conf_matrix[i, j], 'd'),
+                    ha="center", va="center",
+                    color="white" if conf_matrix[i, j] > thresh else "black",
+                    fontsize=14, weight='bold')
+    plt.xlabel(xlabel, fontsize=14)
+    plt.ylabel(ylabel, fontsize=14)
+    plt.xticks(ticks=np.arange(len(label_classes)), labels=label_classes, rotation=45, ha='right', fontsize=12)
+    plt.yticks(ticks=np.arange(len(label_classes)), labels=label_classes, fontsize=12)
+    plt.tight_layout(rect=[0, 0.05, 1, 0.93])
+    plt.show()
+
 
 
 
@@ -403,6 +448,10 @@ def plot_model_evaluation(analyzer, model_folder, manual_labels):
         print("Warning: Length of manual_labels and model predictions do not match. Cannot generate confusion matrix.")
         return
 
+    plot_conf_matrix(manual_labels, predictions, label_classes=class_labels_ordered, 
+                     title='Predicted vs Manual Label', xlabel='Predicted Label', ylabel='Manual Label')
+
+    """
     conf_matrix = confusion_matrix(manual_labels, predictions, labels=class_labels_ordered)
 
     balanced_accuracy = balanced_accuracy_score(manual_labels, predictions)
@@ -429,3 +478,6 @@ def plot_model_evaluation(analyzer, model_folder, manual_labels):
     plt.colorbar(label='Count', shrink=0.7)
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
     plt.show()
+    """
+
+
