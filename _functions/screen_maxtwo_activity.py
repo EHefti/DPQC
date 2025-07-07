@@ -22,23 +22,18 @@ def screen_maxtwo_activity(
     Individual data points (channel rates or spike amplitudes) below the specified
     thresholds will be filtered out before plotting.
 
-    Parameters
-    ----------
-    rec_path : str
-        Path to the data.raw.h5 file.
-    segment_duration_s : int or float
-        Duration of the segment (in seconds) to analyze from the beginning
-        of each recording. Default is 2 seconds.
-    rate_lower_threshold : float
-        Individual channel firing rates below this value will not be included
-        in the firing rate box plot. Set to 0 to show all.
-    rate_upper_threshold : floar
-        ...
-    amp_lower_threshold : float
-        Individual absolute amplitudes below this value will not be included
-        in the amplitude box plot. Set to 0 to show all.
-    amp_upper_threshold : float
-        ...
+    Parameters:
+    - rec_path: (str) Path to the data.raw.h5 file.
+    - segment_duration_s: (int or float) Duration of the segment (in seconds) to analyze from the beginning of each recording.
+    - rate_lower_threshold : (float) Individual channel firing rates below this value will not be included in the firing rate box plot.
+    - rate_upper_threshold : (float) ...
+    - amp_lower_threshold : (float) Individual absolute amplitudes below this value will not be included in the amplitude box plot.
+    - amp_upper_threshold : (float) ...
+
+    Returns:
+    - df_summary: (pd.DataFrame) Summary DataFrame with mean and median firing rates and amplitudes for each well.
+    - all_well_rate_distributions: (dict) Dictionary with well IDs as keys and lists of firing rates (Hz/channel) as values.
+    - all_well_amplitude_distributions: (dict) Dictionary with well IDs as keys and lists of absolute amplitudes (uV) as values.
     """
 
     try:
@@ -156,7 +151,7 @@ def screen_maxtwo_activity(
     well_ids_for_amplitude_plot = [well_id for well_id in well_ids if well_id in amplitude_data_for_boxplot]
     amplitude_values_for_boxplot = [amplitude_data_for_boxplot[well_id] for well_id in well_ids_for_amplitude_plot]
 
-    # --- Plotting the overview ---
+    # Plotting the overview
     if well_ids_for_rate_plot or well_ids_for_amplitude_plot:
         fig, axes = plt.subplots(1, 2, figsize=(18, 7))
         fig.suptitle(

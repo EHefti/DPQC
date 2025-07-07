@@ -79,8 +79,8 @@ def compute_analyzer(rec_path, save_root, well_id, num_units_to_use='all', hp_cu
     
     extension_specific_params = {
         'correlograms': {
-            'bin_ms': 1.0,   # Use 'bin_ms' (milliseconds)
-            'window_ms': 150.0 # Use 'window_ms' (milliseconds)
+            'bin_ms': 1.0,
+            'window_ms': 150.0
         }
     }
     
@@ -98,33 +98,29 @@ def interactive_unit_labeler(recording, sorting, analyzer, output_dir_for_labels
     Launches an interactive GUI for manually labeling spike sorting units as 'good', 'MUA', 'noise', or 'unlabeled'.
     Labels can be exported to a TSV file.
 
-    Parameters
-    ----------
-    recording : spikeinterface.extractors.BaseRecording
-        The recording object.
-    sorting : spikeinterface.sorters.BaseSorting
-        The sorting object containing the units to be labeled.
-    analyzer : spikeinterface.postprocessing.SortingAnalyzer
-        The sorting analyzer object, pre-computed with waveforms and correlograms.
-    output_dir_for_labels : str or Path, default='KiloSort_Quality_Control/'
-        The directory where the 'manual_unit_labels.tsv' file will be saved.
-        This directory will be created if it doesn't exist.
+    Parameters:
+    - recording: The recording object.
+    - sorting: The sorting object containing the units to be labeled.
+    - analyzer: The sorting analyzer object, pre-computed with waveforms and correlograms.
+    - output_dir_for_labels: (str or Path) The directory where the 'manual_unit_labels.tsv' file will be saved. This directory will be created if it doesn't exist.
+    
+    Returns:
+    - sorting: The sorting object with updated 'quality_label' property after manual labeling.
     """
 
     output_dir_for_labels = Path(output_dir_for_labels)
     output_dir_for_labels.mkdir(parents=True, exist_ok=True)
 
-    # --- Initialize Unit Properties for Labeling ---
     unit_ids = sorting.get_unit_ids()
 
-    # Ensure 'quality_label' property exists, initialize if not
+    # Initialize if it doesn't exist
     if 'quality_label' not in sorting.get_property_keys():
         initial_labels = ['unlabeled'] * len(unit_ids)
         sorting.set_property('quality_label', initial_labels)
 
     current_unit_labels = {unit_id: sorting.get_property('quality_label')[i] for i, unit_id in enumerate(unit_ids)}
 
-    # --- Create Interactive Widgets ---
+    # Select Unit interactively as widget
     unit_selector = widgets.Dropdown(
         options=unit_ids,
         value=unit_ids[0] if unit_ids.size > 0 else None,
@@ -148,7 +144,7 @@ def interactive_unit_labeler(recording, sorting, analyzer, output_dir_for_labels
         layout=widgets.Layout(width='auto', height='150px')
     )
 
-    # --- Define Update and Labeling Functions ---
+    # Define Update and Labeling Functions
     def update_plot(change):
         selected_unit_id = change['new']
         if selected_unit_id is None: # Handle case with no units
@@ -174,7 +170,7 @@ def interactive_unit_labeler(recording, sorting, analyzer, output_dir_for_labels
             plt.show()
 
     def update_label_status():
-        sorted_labels = sorted(current_unit_labels.items()) # Sort for consistent display
+        sorted_labels = sorted(current_unit_labels.items())
         label_text = "\n".join([f"Unit {uid}: {label}" for uid, label in sorted_labels])
         label_status.value = label_text
 
@@ -207,9 +203,6 @@ def interactive_unit_labeler(recording, sorting, analyzer, output_dir_for_labels
             unit_selector.value = unit_ids[next_unit_index]
         else:
             print("All units reviewed!")
-            # Optionally, you could reset to the first unit or disable the selector
-            # unit_selector.value = unit_ids[0]
-            # unit_selector.disabled = True
 
     def export_labels_to_tsv(b):
         """Exports the current unit labels to a TSV file."""
@@ -221,8 +214,8 @@ def interactive_unit_labeler(recording, sorting, analyzer, output_dir_for_labels
         labels_df.to_csv(output_filepath, sep='\t', index=False)
         print(f"Labels exported to: {output_filepath}")
 
-    # --- Connect Widgets to Functions ---
-    if unit_selector.value is not None: # Only observe if there are units
+    # Connect Widgets to Functions
+    if unit_selector.value is not None:
         unit_selector.observe(update_plot, names='value')
 
     button_good.on_click(apply_label)
@@ -232,12 +225,12 @@ def interactive_unit_labeler(recording, sorting, analyzer, output_dir_for_labels
     button_unlabeled.on_click(apply_label)
     button_export.on_click(export_labels_to_tsv)
 
-    # Initial plot and label status update (only if there are units)
+    # Initial plot and label status update
     if unit_ids.size > 0:
         update_plot({'new': unit_selector.value})
     update_label_status()
 
-    # --- Arrange and Display Widgets ---
+    # Arrange and show Widgets
     label_buttons = widgets.HBox([button_good, button_nonsoma, button_mua, button_noise, button_unlabeled])
     export_button_box = widgets.HBox([button_export])
     ui = widgets.VBox([unit_selector, label_buttons, output_plot, label_status, export_button_box])
@@ -245,7 +238,6 @@ def interactive_unit_labeler(recording, sorting, analyzer, output_dir_for_labels
     print("Displaying interactive GUI...")
     display(ui)
 
-    # Return the sorting object with updated properties in case it's needed externally
     return sorting
 
 
@@ -254,25 +246,16 @@ def generate_sample_data(durations=[10], sampling_frequency=30000, num_channels=
     """
     Generates toy ground truth recording and sorting data, along with a pre-computed analyzer.
 
-    Parameters
-    ----------
-    durations : list, default=[10]
-        Durations of the recording segments in seconds.
-    sampling_frequency : float, default=30000
-        Sampling frequency of the recording.
-    num_channels : int, default=4
-        Number of channels in the recording.
-    seed : int, default=42
-        Seed for reproducibility of the toy data generation.
+    Parameters:
+    - durations: (list) Durations of the recording segments in seconds.
+    - sampling_frequency: (float) Sampling frequency of the recording.
+    - num_channels: (int) Number of channels in the recording.
+    - seed: (int) Seed for reproducibility of the toy data generation.
 
-    Returns
-    -------
-    recording : spikeinterface.extractors.BaseRecording
-        The generated toy recording object.
-    sorting : spikeinterface.sorters.BaseSorting
-        The generated toy ground truth sorting object.
-    analyzer : spikeinterface.postprocessing.SortingAnalyzer
-        The analyzer object with computed random_spikes, unit_waveforms, and correlograms.
+    Returns:
+    - recording: The generated toy recording object.
+    - sorting: The generated toy ground truth sorting object.
+    - analyzer: The analyzer object with computed random_spikes, unit_waveforms, and correlograms.
     """
     print(f"Generating toy data with durations={durations}, sampling_frequency={sampling_frequency}, num_channels={num_channels}...")
 
@@ -282,7 +265,6 @@ def generate_sample_data(durations=[10], sampling_frequency=30000, num_channels=
     )
 
     # Manually create spike times and clusters for a simple toy sorting
-    # This example assumes a few distinct units with some spikes
     spike_times = np.array([
         1000, 1050, 1100,  # Unit 0
         2000, 2050, 2100,  # Unit 1
@@ -296,7 +278,7 @@ def generate_sample_data(durations=[10], sampling_frequency=30000, num_channels=
         3, 3
     ])
 
-    # Ensure spike_times are within the recording duration (simple check for toy data)
+    # Ensure spike_times are within the recording duration
     max_time_point = int(durations[0] * sampling_frequency)
     valid_indices = spike_times < max_time_point
     spike_times = spike_times[valid_indices]
@@ -340,27 +322,6 @@ def auto_label_stream(rec_path, save_root, stream_id, model_folder, hp_cutoff = 
     print("------------------------")
     print("")
     print(f'Analyzing and Labeling {stream_id}:')
-
-    """
-    h5 = h5py.File(rec_path)
-    rec_name = list(h5['wells'][stream_id].keys())[0]
-    rec = si.MaxwellRecordingExtractor(rec_path, stream_id=stream_id, rec_name=rec_name)
-
-    
-    print(f"Applying high-pass filter with {hp_cutoff} Hz cut-off...")
-    rec = si.highpass_filter(rec, freq_min=hp_cutoff)
-    
-    
-    path_to_sorting = Path(save_root) / stream_id / 'sorter_output'
-    generate_cluster_info(path_to_sorting)
-    sorting = si.read_kilosort(folder_path=path_to_sorting)
-    
-
-    analyzer = si.create_sorting_analyzer(sorting=sorting, recording=rec)
-    analyzer.compute(['noise_levels','random_spikes','waveforms','templates','spike_locations','spike_amplitudes',
-                      'correlograms','principal_components', 'quality_metrics', 'template_metrics'])
-    
-    """
     
     recording, sorting, analyzer = compute_analyzer(
         rec_path, save_root, 
@@ -369,7 +330,7 @@ def auto_label_stream(rec_path, save_root, stream_id, model_folder, hp_cutoff = 
         hp_cutoff_freq=hp_cutoff) 
     
 
-    
+    # label the units using the trained model
     labels_and_probabilities = si.auto_label_units(
         sorting_analyzer=analyzer,
         model_folder=model_folder,
@@ -386,6 +347,7 @@ def auto_label_stream(rec_path, save_root, stream_id, model_folder, hp_cutoff = 
     print(f'Average confidence of the model: {avg_confidence:.3f}')
     print("")
 
+    # Save the labels and probabilities to a TSV file
     labels_and_probabilities = pd.DataFrame(labels_and_probabilities)
     labels_path = Path(save_root) / stream_id / 'sorter_output' / 'labels_and_probabilities.tsv'
     labels_and_probabilities.to_csv(labels_path, sep='\t', index=False)
@@ -418,7 +380,18 @@ def plot_conf_matrix(manual_labels, predictions, label_classes, title='Predicted
 
 
 def plot_model_evaluation(analyzer, model_folder, manual_labels):
+    """
+    Function to evaluate the model by comparing its predictions with manual labels.
     
+    Parameters:
+    - analyzer: The sorting analyzer object containing the computed features.
+    - model_folder: Path to the folder containing the trained model.
+    - manual_labels: List of manual labels corresponding to the units in the sorting.
+    
+    Returns:
+    - None
+    """
+
     print("---Model Evaluation---")
     print("")
     model, model_info = sc.load_model(
@@ -450,34 +423,5 @@ def plot_model_evaluation(analyzer, model_folder, manual_labels):
 
     plot_conf_matrix(manual_labels, predictions, label_classes=class_labels_ordered, 
                      title='Predicted vs Manual Label', xlabel='Predicted Label', ylabel='Manual Label')
-
-    """
-    conf_matrix = confusion_matrix(manual_labels, predictions, labels=class_labels_ordered)
-
-    balanced_accuracy = balanced_accuracy_score(manual_labels, predictions)
-
-    plt.figure(figsize=(7, 6))
-    plt.imshow(conf_matrix, interpolation='nearest', cmap=plt.cm.Blues)
-    
-    thresh = conf_matrix.max() / 2.
-    for i in range(conf_matrix.shape[0]):
-        for j in range(conf_matrix.shape[1]):
-            plt.text(j, i, format(conf_matrix[i, j], 'd'),
-                     ha="center", va="center",
-                     color="white" if conf_matrix[i, j] > thresh else "black",
-                     fontsize=15, weight='bold')
-    
-    plt.xlabel('Predicted Label', fontsize=12)
-    plt.ylabel('Manual Label', fontsize=12)
-    
-    plt.xticks(ticks=np.arange(len(class_labels_ordered)), labels=class_labels_ordered, rotation=45, ha='right', fontsize=10)
-    plt.yticks(ticks=np.arange(len(class_labels_ordered)), labels=class_labels_ordered, fontsize=10)
-    
-    plt.title('Predicted vs Manual Label', fontsize=14, pad=20)
-    plt.suptitle(f"Balanced Accuracy: {balanced_accuracy:.3f}", fontsize=16, weight='bold', y=0.98)
-    plt.colorbar(label='Count', shrink=0.7)
-    plt.tight_layout(rect=[0, 0.03, 1, 0.95])
-    plt.show()
-    """
 
 
