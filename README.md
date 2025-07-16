@@ -20,8 +20,13 @@ Given the type of the recording, one can continue with Axon_Tracking or DeePhys 
    _(change `your_env_name` to the name you want for your environement)_
 
 2. Activate the conda environment
-3. Install Bombcell: `pip install bombcell`
-4. Run the code
+3. Run the code
+
+
+## Description
+1. Pre-assessment: Identify wells that have enough activity to sort them
+2. Spike Sorting: Use Kilosort (or another sorter) to sort the raw data
+3. Quality Control: Label one well manually to train the model, then apply the model to label the rest of your data
 
 
 
